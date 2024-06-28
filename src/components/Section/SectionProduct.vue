@@ -5,7 +5,7 @@
             <img :src="product.picture_url" alt="Product Image" class="w-full h-40 object-cover mb-4">
             <div class="flex flex-row justify-between items-center">
                 <h2 class=" text-md font-bold">{{ product.name }}</h2>
-                <button @click="deleteProduct(index)"
+                <button @click="deleteProduct(product.id, index)"
                     class="bg-red-500 hover:bg-red-600 text-white text-xs py-1 px-1 rounded">Delete</button>
             </div>
             <p class="text-gray-500 mb-8">{{ formatRupiah(product.price) }}</p>
@@ -24,6 +24,9 @@ import { computed, onMounted } from 'vue'
 import { useProductStore } from '../../stores/product'
 import { useCatgStore } from '../../stores/category'
 import { formatRupiah } from '../../utils/formatRp'
+import { useAuthStore } from '../../stores/auth'
+import axios from 'axios'
+
 
 const productStore = useProductStore()
 const categStore = useCatgStore()
@@ -36,9 +39,30 @@ const addToCart = (product) => {
     productStore.addToCart(product)
 }
 
-const deleteProduct = (index) => {
-    productStore.products.splice(index, 1)
+const deleteProduct = async (id, index) => {
+    if (confirm("Apakah Anda ingin menghapus produk ini?")) {
+        try {
+            const authStore = useAuthStore()
+            const token = authStore.token
+            if (token) {
+                await axios.delete(`https://mas-pos.appmedia.id/api/v1/product/${id}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+                productStore.products.splice(index, 1)
+                alert("Product Telah Berhasil di hapus!")
+                await productStore.fetchProducts()
+            } else {
+                alert('No token found. Please login first.')
+            }
+        } catch (error) {
+            console.error('Failed to delete product', error)
+            alert("Failed to delete product")
+        }
+    }
 }
+
 
 const filteredProducts = computed(() => {
     if (categStore.selectedCategory === null) {
