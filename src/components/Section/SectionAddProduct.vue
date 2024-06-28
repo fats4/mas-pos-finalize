@@ -84,7 +84,7 @@ onMounted(async () => {
 })
 
 const filteredCategories = computed(() => {
-    return categories.value.filter(category => category.name === 'Makanan' || category.name === 'Minuman' || category.name === 'Jajanan')
+    return categories.value.filter(category => category.name === 'Makanan' || category.name === 'Minuman' || category.name === 'Jajanan' || category.name === 'Dessert')
 })
 
 const handleFileUpload = (event) => {
